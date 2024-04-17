@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -15,10 +15,9 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-customer',
   templateUrl: './customer.component.html',
-  styleUrls: ['./customer.component.css']
+  styleUrls: ['./customer.component.css'],
 })
 export class CustomerComponent implements OnInit {
-
   customer!: Customer;
   customerId!: number;
 
@@ -28,15 +27,32 @@ export class CustomerComponent implements OnInit {
   orders!: Order[];
   listOrder!: MatTableDataSource<Order>;
   orderLength!: number;
-  columns: string[] = ['id', 'amount', 'address', 'phone', 'orderDate', 'status', 'view', 'action'];
+  columns: string[] = [
+    'id',
+    'amount',
+    'address',
+    'phone',
+    'orderDate',
+    'status',
+    'view',
+    'action',
+  ];
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
 
   user!: Customer;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private customerService: CustomerService, private toastr: ToastrService, private orderService: OrdersService,
-    private localStorageService: LocalStorageService, private router: Router, private sendmailService: SendmailService) { }
+  constructor(
+    private customerService: CustomerService,
+    private toastr: ToastrService,
+    private orderService: OrdersService,
+    private localStorageService: LocalStorageService,
+    private router: Router,
+    private sendmailService: SendmailService
+  ) {}
 
   ngOnInit(): void {
     this.checkLogin();
@@ -54,24 +70,50 @@ export class CustomerComponent implements OnInit {
   }
 
   getCustomer() {
-    this.customerService.getOne(this.customerId).subscribe(data => {
-      this.customer = data as Customer;
-    }, error => {
-      this.toastr.error('Lỗi truy xuất dữ liệu!', 'Hệ thống');
-    })
+    this.customerService.getOne(this.customerId).subscribe(
+      (data) => {
+        this.customer = data as Customer;
+      },
+      (error) => {
+        this.toastr.error('Lỗi truy xuất dữ liệu!', 'Hệ thống');
+      }
+    );
+  }
+
+  ngAfterViewInit() {
+    this.getOrder();
   }
 
   getOrder() {
-    this.orderService.getByUser(this.customerId).subscribe(data => {
-      this.isLoadingOrder = false;
-      this.orders = data as Order[];
-      this.listOrder = new MatTableDataSource(this.orders);
-      this.listOrder.sort = this.sort;
-      this.listOrder.paginator = this.paginator;
-      this.orderLength = this.orders.length;
-    }, error => {
-      this.toastr.error('Lỗi! ' + error.status, 'Hệ thống');
-    })
+    this.isLoadingOrder = true;
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.orderService.getByUser(this.customerId).subscribe(
+      (data) => {
+        this.isLoadingOrder = false;
+        this.orders = data as Order[];
+        this.updateListForPage();
+        this.listOrder = new MatTableDataSource(this.orders);
+        this.listOrder.sort = this.sort;
+        this.listOrder.paginator = this.paginator;
+        this.orderLength = this.orders.length;
+      },
+      (error) => {
+        this.toastr.error('Lỗi! ' + error.status, 'Hệ thống');
+      }
+    );
+  }
+
+  updateListForPage(): Order[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.orders.slice(startIndex, endIndex);
+  }
+
+  handlePageChange(event: any): void {
+    this.currentPage = event;
+    this.itemsPerPage = event; // Update itemsPerPage with the new page size
+    this.updateListForPage(); // Update displayed list for the new page
   }
 
   cancel(orderId: number) {
@@ -81,29 +123,35 @@ export class CustomerComponent implements OnInit {
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonText: 'Không',
-      confirmButtonText: 'Huỷ'
+      confirmButtonText: 'Huỷ',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.orderService.getOrder(orderId).subscribe(data => {
-          this.order = data as Order;
-          this.order.status = 0;
-          this.orderService.update(this.order.id, this.order).subscribe(data => {
-            this.toastr.success('Huỷ thành công !', 'Hệ thống');
-            this.sendmailService.sendMailOrder(data as Order).subscribe(data=>{              
-            })
-            this.ngOnInit();
-          }, error => {
+        this.orderService.getOrder(orderId).subscribe(
+          (data) => {
+            this.order = data as Order;
+            this.order.status = 0;
+            this.orderService.update(this.order.id, this.order).subscribe(
+              (data) => {
+                this.toastr.success('Huỷ thành công !', 'Hệ thống');
+                this.sendmailService
+                  .sendMailOrder(data as Order)
+                  .subscribe((data) => {});
+                this.ngOnInit();
+              },
+              (error) => {
+                this.toastr.error('Lỗi! ' + error.status, 'Hệ thống');
+              }
+            );
+          },
+          (error) => {
             this.toastr.error('Lỗi! ' + error.status, 'Hệ thống');
-          })
-        }, error => {
-          this.toastr.error('Lỗi! ' + error.status, 'Hệ thống');
-        })
+          }
+        );
       }
-    })
+    });
   }
 
   finish() {
     this.ngOnInit();
   }
-
 }

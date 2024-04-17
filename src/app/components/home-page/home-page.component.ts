@@ -157,7 +157,8 @@ export class HomePageComponent implements OnInit {
   }
 
   search(event: any) {
-    const fValue = (event.target as HTMLInputElement).value;
+    const fValue = (event.target as HTMLInputElement).value.trim();
+    // .toLowerCase();
     console.log('fValue', fValue);
 
     const fValueNoAccent = this.removeVietnameseAccents(fValue);
@@ -172,7 +173,7 @@ export class HomePageComponent implements OnInit {
           })
         : this.test;
     // console.log(this.productsF);
-
+    this.page = 1;
     this.totalLength = this.productsF.length;
   }
 

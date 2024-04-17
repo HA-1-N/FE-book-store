@@ -4,9 +4,10 @@
         <div class="row gx-4 gx-lg-5 align-items-center">
             <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" [src]="product.image" /></div>
             <div class="col-md-6">
-                <div class="small mb-1">Mã SP: {{product.productId}}</div>                
+                <div class="small mb-1">Mã SP: {{product.productId}}</div>
                 <h1 class="display-5 fw-bolder">{{product.name}}</h1>
-                <ngb-rating class="mb-2" [(rate)]="rateAvg" [starTemplate]="t" [readonly]="true" title="{{rateAvg}} sao" [max]="5"></ngb-rating> | <span>{{rateLength}} đánh giá</span>
+                <ngb-rating class="mb-2" [(rate)]="rateAvg" [starTemplate]="t" [readonly]="true" title="{{rateAvg}} sao"
+                    [max]="5"></ngb-rating> | <span>{{rateLength}} đánh giá</span>
                 <div class="fs-5 mb-3">
                     <small class="text-decoration-line-through"
                         style="color: thistle; font-size: 70%;">{{product.price|currency:'VND'}}</small>
@@ -31,18 +32,20 @@
         </div>
         <div class="row mt-5">
             <h3 style="font-weight: bold; font-size: 20px;">Đánh giá nhận xét về sản phẩm</h3>
-            <select class="form-select mb-2" style="width: 10%; margin-left: 90%;" [(ngModel)]="rateSize" *ngIf="rates.length>0">
+            <select class="form-select mb-2" style="width: 10%; margin-left: 90%;" [(ngModel)]="rateSize"
+                *ngIf="rates.length>0">
                 <option value="5">Hiển thị 5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
-              </select>
+            </select>
             <div class="border rounded p-3" *ngIf="rateLength==0">
                 <i class="text-center">Sản phẩm này chưa có đánh giá nào!</i>
             </div>
             <div class="border rounded" *ngIf="rateLength>0">
                 <mat-list>
-                    <mat-list-item *ngFor="let item of ratesI |orderBy:'rateDate':true| paginate: { itemsPerPage: rateSize, currentPage: 1 }"
+                    <mat-list-item
+                        *ngFor="let item of ratesI |orderBy:'rateDate':true| paginate: { itemsPerPage: rateSize, currentPage: 1 }"
                         class="mb-5 mt-4">
                         <img [src]="item.user.image" style="width: 50px;" class="img-fluid p-2 col-3">
                         <div class="col-9">
@@ -88,7 +91,8 @@
                                 style="cursor: pointer;">{{item.name}}</h4>
                             <!-- Product reviews-->
                             <div class="d-flex justify-content-center small text-warning mb-2">
-                                <ngb-rating class="mb-2" [rate]="getStar(item.productId)" [starTemplate]="t" [readonly]="true" title="{{getStar(item.productId)}} sao" [max]="5"></ngb-rating>
+                                <ngb-rating class="mb-2" [rate]="getStar(item.productId)" [starTemplate]="t"
+                                    [readonly]="true" title="{{getStar(item.productId)}} sao" [max]="5"></ngb-rating>
                             </div>
                             <!-- Product price-->
                             <small class="text-muted text-decoration-line-through"

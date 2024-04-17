@@ -55,9 +55,9 @@
                     </div>
                 </div>
             </div>
-            <div class="col-8 offset-2 mt-4 mb-4">
+            <div *ngIf="!isLoadingOrder" class="col-8 offset-2 mt-4 mb-4">
                 <h2>Lịch sử đặt hàng</h2>
-                <table mat-table [dataSource]="listOrder" matSort class="mat-elevation-z8">
+                <!-- <table mat-table [dataSource]="listOrder" matSort class="mat-elevation-z8">
                     <ng-container matColumnDef="id">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%;">Mã đơn hàng</th>
                         <td mat-cell *matCellDef="let row">{{row.id}}</td>
@@ -98,7 +98,63 @@
                     <tr mat-row *matRowDef="let row; columns: columns;"></tr>
                 </table>
                 <mat-paginator [length]="orderLength" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 50, 100]">
-                </mat-paginator>
+                </mat-paginator> -->
+
+                <div class="row mr-0 ml-0 mt-2">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="table-responsive wrapper-table">
+                            <div *ngIf="orderLength==0">
+                                <h1 class="text-center" style="margin-top: 25%; font-size: 50px; min-height: 500px;">
+                                    Không có đơn
+                                    hàng
+                                    nào !</h1>
+                            </div>
+                            <div *ngIf="orderLength!=0 && !isLoadingOrder">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Mã đơn hàng</th>
+                                            <th scope="col">Tổng tiền</th>
+                                            <th scope="col">Địa chỉ</th>
+                                            <th scope="col">Số điện thoại</th>
+                                            <th scope="col">Ngày mua</th>
+                                            <th scope="col">Trạng thái</th>
+                                            <th scope="col">Chi tiết</th>
+                                            <th scope="col">Huỷ đơn</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let item of orders">
+                                            <td>{{item.id}}</td>
+                                            <td>{{item.amount|currency:'VND'}}</td>
+                                            <td>{{item.address}}</td>
+                                            <td>{{item.phone}}</td>
+                                            <td>{{item.orderDate|date:'dd-MM-yyyy'}}</td>
+                                            <td>{{item.status==0?"Đã huỷ":item.status==1?"Chờ xác
+                                                nhận":item.status==2?"Đang giao hàng":"Đã giao"}}</td>
+                                            <td>
+                                                <app-order-detail [orderId]="item.id"></app-order-detail>
+                                            </td>
+                                            <td>
+                                                <a [ngClass]="{'disabled':item.status!=1}"
+                                                    style="cursor: pointer; color: orangered;"
+                                                    (click)='cancel(item.id)'><i class="bi bi-x-circle-fill"></i></a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div *ngIf="orderLength != 0 && !isLoadingOrder">
+                            <div class="row justify-content-center mx-0">
+                                <ngb-pagination [(page)]="currentPage" [collectionSize]="orderLength"
+                                    [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true"
+                                    (pageChange)="handlePageChange($event)">
+                                </ngb-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
